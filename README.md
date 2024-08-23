@@ -80,8 +80,8 @@ Feel free to contribute to the project, report issues, or suggest new features!
 
 Happy measuring with TenniScale!
 
-### Next Steps
+### TODOs
 
-- **Create the Logo:** Use the concept provided to design a logo or hire a designer to create it for you.
-- **Host the Logo Image:** Once you have the logo, host it on a platform like GitHub, Imgur, or your project repository and replace the placeholder link in the README.
-- **Finalize and Push the README:** Save the README file as `README.md` in your project root directory and push it to your GitHub repository.
+- [x] **Create the Logo:** Use the concept provided to design a logo or hire a designer to create it for you.
+- [x] **Host the Logo Image:** Once you have the logo, host it on a platform like GitHub, Imgur, or your project repository and replace the placeholder link in the README.
+- [x] **Finalize and Push the README:** Save the README file as `README.md` in your project root directory and push it to your GitHub repository.
