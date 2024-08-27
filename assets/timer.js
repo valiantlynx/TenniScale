@@ -5,6 +5,8 @@ const recordBounceButton = document.getElementById('recordBounceButton');
 const elapsedTimeSpan = document.getElementById('elapsedTime');
 const totalTimeInput = document.getElementById('total_time_ms');
 const intervalTimeInput = document.getElementById('interval_time_ms');
+const totalTimeInputPredict = document.getElementById('total_time_ms_predict');
+const intervalTimeInputPredict = document.getElementById('interval_time_ms_predict');
 
 // Start Timer
 function startTimer() {
@@ -21,7 +23,9 @@ function stopTimer() {
     startButton.disabled = false;
     stopButton.disabled = true;
     recordBounceButton.disabled = true;
-    totalTimeInput.value = (new Date() - startTime) / 1000; // in seconds
+    const elapsedSeconds = (new Date() - startTime) / 1000; // in seconds
+    totalTimeInput.value = (elapsedSeconds * 1000).toFixed(0); // in milliseconds
+    totalTimeInputPredict.value = totalTimeInput.value; // also set for prediction form
     calculateInterval();
 }
 
@@ -45,8 +49,10 @@ function calculateInterval() {
         const previousBounce = bounces[bounces.length - 2];
         const interval = (lastBounce - previousBounce) * 1000; // in milliseconds
         intervalTimeInput.value = interval.toFixed(0);
+        intervalTimeInputPredict.value = intervalTimeInput.value; // also set for prediction form
     } else {
         intervalTimeInput.value = 0;
+        intervalTimeInputPredict.value = 0; // also set for prediction form
     }
 }
 

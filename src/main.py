@@ -10,7 +10,7 @@ import io
 import base64
 import json
 
-    
+
 app = FastAPI()
 
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
@@ -21,6 +21,7 @@ bounce_data_df = pd.read_csv(bounce_data_file)
 
 # Convert CSV data to dictionary list format for model usage
 bounce_data = bounce_data_df.to_dict(orient='records')
+
 
 class FortunaModel:
     def __init__(self):
@@ -39,6 +40,7 @@ class FortunaModel:
         X = [[d['Total Time (ms)'], d['Interval Time (ms)']] for d in data]
         y = [d['Height'] for d in data]
         self.fit(X, y)
+
 
 model = FortunaModel()
 model.calibrate(bounce_data)
@@ -68,14 +70,21 @@ async def read_root():
                     <div class="text-center mb-6">
                         <p>Elapsed Time: <span id="elapsedTime">0.00</span> seconds</p>
                     </div>
-                    <form action="/api/measure" method="post" class="text-center">
+                    <!-- Form to submit data for calibration -->
+                    <form action="/api/measure" method="post" class="text-center mb-6">
                         <input type="hidden" id="total_time_ms" name="total_time_ms">
                         <input type="hidden" id="interval_time_ms" name="interval_time_ms">
                         <div class="mb-4">
                             <label for="height" class="block text-gray-700 text-sm font-bold mb-2">Height (cm):</label>
                             <input type="number" id="height" name="height" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                         </div>
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit Measurement</button>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit Measurement for Calibration</button>
+                    </form>
+                    <!-- Form to trigger prediction -->
+                    <form action="/api/predict" method="post" class="text-center">
+                        <input type="hidden" id="total_time_ms_predict" name="total_time_ms">
+                        <input type="hidden" id="interval_time_ms_predict" name="interval_time_ms">
+                        <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Predict Height</button>
                     </form>
                     <div class="text-center mt-6">
                         <a href="/api/results" class="text-blue-500 hover:text-blue-800">View Results</a>
@@ -87,6 +96,7 @@ async def read_root():
 
     """
 
+
 @app.post("/api/measure")
 async def submit_data(height: float = Form(...), total_time_ms: float = Form(...), interval_time_ms: float = Form(...)):
     bounce_data.append({
@@ -97,30 +107,97 @@ async def submit_data(height: float = Form(...), total_time_ms: float = Form(...
     model.calibrate(bounce_data)
     return RedirectResponse(url="/", status_code=303)
 
+
 @app.get("/api/calibrate")
 async def calibrate_model():
     model.calibrate(bounce_data)
     return {"message": "Model calibrated successfully!"}
 
+
 @app.get("/api/results", response_class=HTMLResponse)
 async def get_results():
     df = pd.DataFrame(bounce_data)
 
-    fig, ax = plt.subplots()
+    # 1. Scatter Plot: Interval Time vs Total Time for Different Heights
+    fig1, ax1 = plt.subplots(figsize=(12, 6))
     for height in df['Height'].unique():
         subset = df[df['Height'] == height]
-        ax.plot(subset['Total Time (ms)'], subset['Interval Time (ms)'], marker='o', label=f'Height {height} cm')
+        ax1.scatter(subset['Total Time (ms)'], subset['Interval Time (ms)'],
+                    label=f'Height {height} cm', alpha=0.7)
+    ax1.set_xlabel('Total Time (ms)')
+    ax1.set_ylabel('Interval Time (ms)')
+    ax1.set_title(
+        'Interval Time (ms) vs Total Time (ms) for Different Heights')
+    ax1.legend()
+    ax1.grid(True)
 
-    ax.set_xlabel('Total Time (ms)')
-    ax.set_ylabel('Interval Time (ms)')
-    ax.set_title('Interval Time (ms) vs Total Time (ms) for Different Heights')
-    ax.legend()
-    ax.grid(True)
+    # Save first figure to buffer
+    buf1 = io.BytesIO()
+    plt.savefig(buf1, format='png')
+    buf1.seek(0)
+    img_str1 = base64.b64encode(buf1.read()).decode('utf-8')
+    plt.close(fig1)  # Close the figure to free up memory
 
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    img_str = base64.b64encode(buf.read()).decode('utf-8')
+    # 2. Line Plots: Total Time and Interval Time Over Bounce Number for All Bounces
+    fig2, (ax2, ax3) = plt.subplots(1, 2, figsize=(12, 6))
+
+    for height in df['Height'].unique():
+        height_data = df[df['Height'] == height]
+        ax2.plot(height_data['Bounce Number'], height_data['Total Time (ms)'],
+                 marker='o', label=f'Height {height} cm')
+        ax3.plot(height_data['Bounce Number'], height_data['Interval Time (ms)'],
+                 marker='o', label=f'Height {height} cm')
+
+    ax2.set_xlabel('Bounce Number')
+    ax2.set_ylabel('Total Time (ms)')
+    ax2.set_title('Total Time vs Bounce Number')
+    ax2.legend()
+    ax2.grid(True)
+
+    ax3.set_xlabel('Bounce Number')
+    ax3.set_ylabel('Interval Time (ms)')
+    ax3.set_title('Interval Time vs Bounce Number')
+    ax3.legend()
+    ax3.grid(True)
+
+    plt.tight_layout()
+
+    # Save second figure to buffer
+    buf2 = io.BytesIO()
+    plt.savefig(buf2, format='png')
+    buf2.seek(0)
+    img_str2 = base64.b64encode(buf2.read()).decode('utf-8')
+    plt.close(fig2)  # Close the figure to free up memory
+
+    # 3. Histogram of Bounce Numbers
+    fig3, ax4 = plt.subplots(figsize=(12, 6))
+    max_bounce = int(df['Bounce Number'].max())  # Convert to int
+    ax4.hist(df['Bounce Number'], bins=range(
+        1, max_bounce + 2), edgecolor='black')
+    ax4.set_xlabel('Bounce Number')
+    ax4.set_ylabel('Frequency')
+    ax4.set_title('Histogram of Bounce Numbers')
+    ax4.grid(True)
+
+    # Save third figure to buffer
+    buf3 = io.BytesIO()
+    plt.savefig(buf3, format='png')
+    buf3.seek(0)
+    img_str3 = base64.b64encode(buf3.read()).decode('utf-8')
+    plt.close(fig3)  # Close the figure to free up memory
+
+    # 4. Box Plot of Total Time and Interval Time
+    fig4, ax5 = plt.subplots(figsize=(12, 6))
+    df[['Total Time (ms)', 'Interval Time (ms)']].plot.box(ax=ax5)
+    ax5.set_title('Box Plot of Total Time and Interval Time')
+    ax5.grid(True)
+
+    # Save fourth figure to buffer
+    buf4 = io.BytesIO()
+    plt.savefig(buf4, format='png')
+    buf4.seek(0)
+    img_str4 = base64.b64encode(buf4.read()).decode('utf-8')
+    plt.close(fig4)  # Close the figure to free up memory
 
     return f"""
     <html>
@@ -132,7 +209,22 @@ async def get_results():
         <div class="container mx-auto p-4">
             <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 <h1 class="text-2xl font-bold mb-4 text-center text-blue-600">Measurement Results</h1>
-                <img src="data:image/png;base64,{img_str}" class="mx-auto">
+                <div class="mb-4">
+                    <h2 class="text-xl font-semibold text-center text-blue-500">Interval Time vs Total Time for Different Heights</h2>
+                    <img src="data:image/png;base64,{img_str1}" class="mx-auto">
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-xl font-semibold text-center text-blue-500">Total Time and Interval Time Over Bounce Number</h2>
+                    <img src="data:image/png;base64,{img_str2}" class="mx-auto">
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-xl font-semibold text-center text-blue-500">Histogram of Bounce Numbers</h2>
+                    <img src="data:image/png;base64,{img_str3}" class="mx-auto">
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-xl font-semibold text-center text-blue-500">Box Plot of Total Time and Interval Time</h2>
+                    <img src="data:image/png;base64,{img_str4}" class="mx-auto">
+                </div>
                 <br>
                 <div class="text-center">
                     <a href="/" class="text-blue-500 hover:text-blue-800">Back</a>
@@ -143,11 +235,36 @@ async def get_results():
     </html>
     """
 
-@app.get("/api/predict")
-async def predict_height(total_time_ms: float, interval_time_ms: float):
+@app.post("/api/predict")
+async def predict_height(total_time_ms: float = Form(...), interval_time_ms: float = Form(...)):
+    # Use the Fortuna model to predict height
     features = [total_time_ms, interval_time_ms]
     predicted_height = model.predict([features])[0]
-    return {"predicted_height": predicted_height}
+
+    return HTMLResponse(content=f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Prediction Result</title>
+            <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        </head>
+        <body class="bg-blue-100 font-sans leading-normal tracking-normal">
+            <div class="container mx-auto p-4">
+                <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                    <h1 class="text-2xl font-bold mb-4 text-center text-blue-600">Prediction Result</h1>
+                    <div class="text-center">
+                        <p class="text-lg font-semibold">Predicted Height: {predicted_height:.2f} cm</p>
+                    </div>
+                    <div class="text-center mt-6">
+                        <a href="/" class="text-blue-500 hover:text-blue-800">Back</a>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+    """)
 
 # Run FastAPI
 if __name__ == "__main__":
