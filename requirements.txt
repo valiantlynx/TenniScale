@@ -4,3 +4,4 @@ debugpy
 pandas
 numpy 
 matplotlib
+python-multipart

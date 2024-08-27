@@ -1,13 +1,15 @@
 version: '1.0'
 services:
   tenniscale:
-    container_name: backend
+    container_name: tenniscale
     build: .
-    image: backend:latest
+    image: tenniscale:latest
     volumes:
       - .:/workspace:cached
     command: sh -c "uvicorn src.main:app --host=0.0.0.0 --port=8000 --reload"
     restart: always
+    ports:
+      - 8000:8000
     tty: true
     environment:
       LOGURU_COLORIZE: "true"
