@@ -1,15 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-WORKDIR /code 
+WORKDIR /workspace 
 
 COPY ./requirements.txt ./
-RUN apt-get update && apt-get install git -y && apt-get install curl -y
+RUN apt-get update && apt-get install git curl python3-dev build-essential libnss3 libnspr4 libgbm1 libasound2 -y
 
-RUN python -m venv venv
-RUN chmod +x ./venv/bin/activate && ./venv/bin/activate
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./src ./src
+COPY ./ ./
 
 EXPOSE 8000
 

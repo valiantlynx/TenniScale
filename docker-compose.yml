@@ -1,11 +1,16 @@
 version: '1.0'
 services:
-  fastapi:
+  tenniscale:
+    container_name: backend
     build: .
-    ports:
-      - 8000:8000
-      - 5678:5678
+    image: backend:latest
     volumes:
-      - .:/code
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+      - .:/workspace:cached
+    command: sh -c "uvicorn src.main:app --host=0.0.0.0 --port=8000 --reload"
     restart: always
+    tty: true
+    environment:
+      LOGURU_COLORIZE: "true"
+      DEBUG_COLORS: "true"
+      TERM: xterm-256color
+      COLORTERM: truecolor

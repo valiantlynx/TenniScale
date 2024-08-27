@@ -1,8 +1,8 @@
 {
   "name": "python-development-environment-dev",
   "dockerComposeFile": ["../docker-compose.yml"],
-  "service": "fastapi",
-  "workspaceFolder": "/code",
+  "service": "tenniscale",
+  "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {
       "extensions": [

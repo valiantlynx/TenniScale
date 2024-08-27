@@ -1,3 +1,6 @@
 fastapi
 uvicorn
 debugpy
+pandas
+numpy 
+matplotlib
