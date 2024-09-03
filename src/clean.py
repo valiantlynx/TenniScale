@@ -308,3 +308,17 @@ with open(csv_filename, mode='w', newline='') as csv_file:
         writer.writerow(row)
 
 print(f"CSV file '{csv_filename}' created successfully.")
+
+
+# Creating Markdown table
+md_filename = "tennis_ball_bounce_data.md"
+with open(md_filename, mode='w') as md_file:
+    # Writing the header of the markdown table
+    md_file.write("| Height | Bounce Number | Total Time | Interval Time | Total Time (ms) | Interval Time (ms) |\n")
+    md_file.write("| ------ | ------------- | ---------- | ------------- | --------------- | ------------------ |\n")
+    
+    # Writing each row
+    for row in rows:
+        md_file.write(f"| {row['Height']} | {row['Bounce Number']} | {row['Total Time']} | {row['Interval Time']} | {row['Total Time (ms)']} | {row['Interval Time (ms)']} |\n")
+
+print(f"Markdown file '{md_filename}' created successfully.")

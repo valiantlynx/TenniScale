@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 import json
-
+import random
 
 app = FastAPI()
 
@@ -19,32 +19,45 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 bounce_data_file = "src/tennis_ball_bounce_data.csv"
 bounce_data_df = pd.read_csv(bounce_data_file)
 
+# Consider only the first four bounces
+bounce_data_df = bounce_data_df[bounce_data_df['Bounce Number'] <= 4]
+
 # Convert CSV data to dictionary list format for model usage
 bounce_data = bounce_data_df.to_dict(orient='records')
 
-
 class FortunaModel:
     def __init__(self):
-        self.coefficients = None
+        self.best_params = None
+        self.best_mse = float('inf')
 
-    def fit(self, X, y):
-        X = np.array(X)
-        y = np.array(y)
-        self.coefficients = np.linalg.lstsq(X, y, rcond=None)[0]
+    def fit(self, X, y, params):
+        # Simple linear model y = a * X1 + b * X2 + c
+        a, b, c = params
+        predictions = a * X[:, 0] + b * X[:, 1] + c
+        mse = np.mean((predictions - y) ** 2)
+        return mse, predictions
+
+    def calibrate(self, data):
+        X = np.array([[d['Total Time (ms)'], d['Interval Time (ms)']] for d in data])
+        y = np.array([d['Height'] for d in data])
+
+        for _ in range(1000):  # Try 1000 random parameter sets
+            params = [random.uniform(-1, 1) for _ in range(3)]  # Random coefficients a, b, c
+            mse, _ = self.fit(X, y, params)
+
+            if mse < self.best_mse:
+                self.best_mse = mse
+                self.best_params = params
 
     def predict(self, X):
         X = np.array(X)
-        return X @ self.coefficients
-
-    def calibrate(self, data):
-        X = [[d['Total Time (ms)'], d['Interval Time (ms)']] for d in data]
-        y = [d['Height'] for d in data]
-        self.fit(X, y)
-
+        if self.best_params is None:
+            raise Exception("Model is not calibrated yet.")
+        a, b, c = self.best_params
+        return a * X[:, 0] + b * X[:, 1] + c
 
 model = FortunaModel()
 model.calibrate(bounce_data)
-
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
@@ -93,9 +106,7 @@ async def read_root():
             </div>
         </body>
         </html>
-
     """
-
 
 @app.post("/api/measure")
 async def submit_data(height: float = Form(...), total_time_ms: float = Form(...), interval_time_ms: float = Form(...)):
@@ -107,12 +118,10 @@ async def submit_data(height: float = Form(...), total_time_ms: float = Form(...
     model.calibrate(bounce_data)
     return RedirectResponse(url="/", status_code=303)
 
-
 @app.get("/api/calibrate")
 async def calibrate_model():
     model.calibrate(bounce_data)
     return {"message": "Model calibrated successfully!"}
-
 
 @app.get("/api/results", response_class=HTMLResponse)
 async def get_results():
@@ -168,7 +177,7 @@ async def get_results():
     buf2.seek(0)
     img_str2 = base64.b64encode(buf2.read()).decode('utf-8')
     plt.close(fig2)  # Close the figure to free up memory
-
+    
     # 3. Histogram of Bounce Numbers
     fig3, ax4 = plt.subplots(figsize=(12, 6))
     max_bounce = int(df['Bounce Number'].max())  # Convert to int

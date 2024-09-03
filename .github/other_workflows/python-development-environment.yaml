@@ -1,6 +1,6 @@
-name: python-development-environment
+name: tenniscale
 
-run-name: ${{ github.actor }} is building python-development-environment 🚀
+run-name: ${{ github.actor }} is building tenniscale 🚀
 
 on:
   push:
@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-and-push-images:
-    name: Build python-development-environment
+    name: Build tenniscale
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -69,8 +69,8 @@ jobs:
       uses: docker/metadata-action@v3
       with:
         images: |
-          ${{ secrets.DOCKER_HUB_USERNAME }}/python-development-environment
-          ghcr.io/${{ secrets.DOCKER_HUB_USERNAME }}/python-development-environment
+          ${{ secrets.DOCKER_HUB_USERNAME }}/tenniscale
+          ghcr.io/${{ secrets.DOCKER_HUB_USERNAME }}/tenniscale
         flavor: |
           latest=false
         tags: |

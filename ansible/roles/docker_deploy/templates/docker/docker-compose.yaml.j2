@@ -2,9 +2,9 @@
 version: '3.8'
 
 services:
-  python-development-environment:
-    image: valiantlynx/python-development-environment:latest
-    container_name: python-development-environment
+  tenniscale:
+    image: valiantlynx/tenniscale:latest
+    container_name: tenniscale
     restart: always
     ports:
       - 8000:8000
@@ -24,7 +24,7 @@ services:
       - ./certbot/logs:/var/log/letsencrypt
       - ./certbot/www:/var/www/certbot
     depends_on:
-      - python-development-environment
+      - tenniscale
     restart: unless-stopped
     networks:
       - monitoring  

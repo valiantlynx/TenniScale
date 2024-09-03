@@ -1,5 +1,5 @@
 {
-  "name": "python-development-environment-dev",
+  "name": "tenniscale-dev",
   "dockerComposeFile": ["../docker-compose.yml"],
   "service": "tenniscale",
   "workspaceFolder": "/workspace",
@@ -30,7 +30,7 @@
         "esbenp.prettier-vscode",
         "jpotterm.simple-vim",
         "wakatime.vscode-wakatime",
-        "ms-azuretools.vscode-docker"
+        "mechatroner.rainbow-csv"
       ],
       "settings": {
         "python.pythonPath": "/usr/local/bin/python",

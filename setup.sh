@@ -1,7 +1,7 @@
-docker build -t python-development-environment-image .
-docker run --name python-development-environment-container -d -p 8000:8000 -v $(pwd):/code python-development-environment-image
+docker build -t tenniscale-image .
+docker run --name tenniscale-container -d -p 8000:8000 -v $(pwd):/code tenniscale-image
 
 #connect to turborepo
-git subtree add --prefix=apps/python-development-environment https://github.com/valiantlynx/python-development-environment.git main --squash
-git subtree pull --prefix=apps/python-development-environment https://github.com/valiantlynx/python-development-environment.git main --squash
-git subtree push --prefix=apps/python-development-environment https://github.com/valiantlynx/python-development-environment.git main
+git subtree add --prefix=apps/tenniscale https://github.com/valiantlynx/tenniscale.git main --squash
+git subtree pull --prefix=apps/tenniscale https://github.com/valiantlynx/tenniscale.git main --squash
+git subtree push --prefix=apps/tenniscale https://github.com/valiantlynx/tenniscale.git main
