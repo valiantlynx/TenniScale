@@ -40,6 +40,7 @@ async def read_root():
             <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
             <link rel="stylesheet" href="/assets/styles.css">
             <script src="/assets/timer.js" defer></script>
+            <link rel="icon" type="image/x-icon" href="/assets/logo.jpg">
         </head>
         <body class="bg-custom-olive font-sans leading-normal tracking-normal">
             <div class="container mx-auto p-4">
@@ -187,6 +188,7 @@ async def get_results():
             <title>Measurement Results</title>
             <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
             <link rel="stylesheet" href="/assets/styles.css">
+            <link rel="icon" type="image/x-icon" href="/assets/logo.jpg">
         </head>
         <body class="bg-custom-olive font-sans leading-normal tracking-normal">
             <div class="container mx-auto p-4">
@@ -245,6 +247,7 @@ async def predict_height(total_time_ms: float = Form(...), interval_time_ms: flo
             <title>Prediction Result</title>
             <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
             <link rel="stylesheet" href="/assets/styles.css">
+            <link rel="icon" type="image/x-icon" href="/assets/logo.jpg">
         </head>
         <body class="bg-custom-olive font-sans leading-normal tracking-normal">
             <div class="container mx-auto p-4">
