@@ -1,0 +1,30 @@
+.bg-custom-dark {
+  background-color: #ccd0a4;
+} /* light olive */
+.bg-custom-lime {
+  background-color: #c4dc1c;
+} /* bright lime green */
+.bg-custom-olive {
+  background-color: #9aa454;
+} /* olive green */
+.bg-custom-pale-olive {
+  background-color: #c9d572;
+}
+.text-custom-black {
+  color: #3b3d1f;
+} /* very dark olive */
+.text-custom-gray {
+  color: #5a5c33;
+} /* slightly less dark olive */
+.hover-bg-custom-lime:hover {
+  background-color: #c4dc1c;
+} /* hover bright lime green */
+.hover-bg-custom-dark:hover {
+  background-color: #ccd0a4;
+} /* hover light olive */
+.bg-custom-light {
+  background-color: #eff0e9;
+} /* light gray */
+.hover-text-custom-dark:hover {
+  color: #ccd0a4;
+} /* hover light olive */
