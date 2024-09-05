@@ -76,6 +76,7 @@ class FortunaModel:
         y = [d['Height'] for d in data]
 
         for _ in range(1000):
+            print("Epoch: ", _)
             params = [random.uniform(-1, 1) for _ in range(3)]
             mse, _ = self.fit(X, y, params)
 
@@ -83,6 +84,7 @@ class FortunaModel:
                 self.best_mse = mse
                 self.best_params = params
                 self.save_params()
+            
 
     def predict(self, X):
         """Predicts the height for the given indipendent parameters(time in ms) 
@@ -108,6 +110,7 @@ class FortunaModel:
     def save_params(self):
         """save the best parameters and the best mean squared error as a json file
         """
+        print("Hurra!! Found a better model :)")
         with open(self.params_file, 'w') as f:
             json.dump({'best_params': self.best_params,
                       'best_mse': self.best_mse}, f)

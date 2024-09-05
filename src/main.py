@@ -38,6 +38,7 @@ async def read_root():
     Returns:
         str: HTML to be rendred by the browser
     """    
+    await calibrate_model() # might be a better way that doing it on start up. The best params are saved so no worries anyway
     return """
         <!DOCTYPE html>
         <html lang="en">
