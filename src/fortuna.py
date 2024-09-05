@@ -4,6 +4,7 @@ import random
 
 class FortunaModel:
     def __init__(self, params_file="assets/best_params.json"):
+
         self.best_params = None
         self.best_mse = float('inf')
         self.params_file = params_file
@@ -84,10 +85,10 @@ class FortunaModel:
                 self.save_params()
 
     def predict(self, X):
-        """Predicts the 
+        """Predicts the height for the given indipendent parameters(time in ms) 
 
         Args:
-            X (Array(tuples)): A list of tuples where each tuple contains the independent parameters from our dataset
+            X (Array(tuples)): A list of tuples where each tuple contains the indipendent parameters(time in ms) from our dataset
                 e.g [(d['Total Time (ms)'], d['Interval Time (ms)'])] = [(140, 140), (710, 570),..]
 
         Raises:
@@ -105,11 +106,15 @@ class FortunaModel:
         return [(a * x1 + b * x2 + c) for x1, x2 in X]
 
     def save_params(self):
+        """save the best parameters and the best mean squared error as a json file
+        """
         with open(self.params_file, 'w') as f:
             json.dump({'best_params': self.best_params,
                       'best_mse': self.best_mse}, f)
 
     def load_params(self):
+        """Reads the the json file that containe the best parameters and the best mean squared error
+        """
         try:
             with open(self.params_file, 'r') as f:
                 params = json.load(f)

@@ -18,10 +18,11 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 bounce_data_file = "src/tennis_ball_bounce_data.csv"
 bounce_data_df = pd.read_csv(bounce_data_file)
 full_bounce_data_df = pd.read_csv(bounce_data_file)
-# Consider only the first four bounces
+
+# Consider only the first four bounces ? or three ?
 bounce_data_df = bounce_data_df[bounce_data_df['Bounce Number'] <= 4]
 
-# Convert CSV data to dictionary list format for model usage
+# Convert CSV data to dictionary list format for model
 bounce_data = bounce_data_df.to_dict(orient='records')
 full_bounce_data = full_bounce_data_df.to_dict(orient='records')
 
@@ -30,6 +31,13 @@ model.calibrate(bounce_data)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
+    """Serves back html to the client side. the html is connected with a styles.css and a timer.js.
+    styles.css is for extra styling on top of the tailwind classes
+    timer.js is for the timer functionality in the client side.
+
+    Returns:
+        str: HTML to be rendred by the browser
+    """    
     return """
         <!DOCTYPE html>
         <html lang="en">
@@ -83,6 +91,16 @@ async def read_root():
 
 @app.post("/api/measure")
 async def submit_data(height: float = Form(...), total_time_ms: float = Form(...), interval_time_ms: float = Form(...)):
+    """handles the data that is submited from the clientside incase the user clicks submit data for calibration.
+
+    Args:
+        height (float, optional): The height of the user in centimeters. Defaults to Form(...).
+        total_time_ms (float, optional): The total time recorded. it not important from the fourth bouce and on. Defaults to Form(...).
+        interval_time_ms (float, optional): the time between the bounces. Defaults to Form(...).
+
+    Returns:
+        RedirectResponse: redirects you back to the root of the site
+    """
     bounce_data.append({
         'Height': height,
         'Total Time (ms)': total_time_ms,
@@ -94,12 +112,36 @@ async def submit_data(height: float = Form(...), total_time_ms: float = Form(...
 
 @app.get("/api/calibrate")
 async def calibrate_model():
+    """calls the calibrate model function with the our dataset. maybe ill call it on startup or something
+
+    Returns:
+        dict: message of success
+    """
     model.calibrate(bounce_data)
     return {"message": "Model calibrated successfully!"}
 
 
 @app.get("/api/results", response_class=HTMLResponse)
 async def get_results():
+    """Generates and returns an HTML page displaying various visualizations and model metrics 
+    based on bounce data.
+
+    The function performs the following steps:
+    1. Loads bounce data into pandas DataFrames for analysis.
+    2. Creates several plots:
+        - Scatter Plot: Shows the relationship between "Interval Time" and "Total Time" 
+          across different bounce heights.
+        - Line Plots: Illustrates "Total Time" and "Interval Time" over the bounce number 
+          for different heights.
+        - Histogram: Displays the distribution of bounce numbers. not really important but what the hell
+        - Box Plot: Summarizes the distribution of "Total Time" and "Interval Time". i dont know
+    3. Retrieves and displays the best parameters and Mean Squared Error (MSE) 
+       from a machine learning model.
+    4. Embeds the plots and metrics into an HTML page using Tailwind CSS and some custom css for styling.
+
+    Returns:
+        HTMLResponse: An HTML page containing the visualizations and model metrics.
+    """  
     df = pd.DataFrame(bounce_data)
     full_df = pd.DataFrame(full_bounce_data)
 
@@ -194,6 +236,11 @@ async def get_results():
             <div class="container mx-auto p-4">
                 <div class="bg-custom-dark shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <h1 class="text-2xl font-bold mb-4 text-center text-custom-black">Measurement Results</h1>
+                    <div class="mb-4">
+                        <h2 class="text-xl font-semibold text-center text-custom-black">Best Parameters and MSE</h2>
+                        <p class="text-center text-lg text-custom-black">Best Parameters: {best_params}</p>
+                        <p class="text-center text-lg text-custom-black">Best MSE: {best_mse:.4f}</p>
+                    </div>
 
                     <div class="mb-4">
                         <h2 class="text-xl font-semibold text-center text-custom-black">Interval Time vs Total Time for Different Heights</h2>
@@ -215,12 +262,6 @@ async def get_results():
                         <img src="data:image/png;base64,{img_str4}" class="mx-auto">
                     </div>
 
-                    <div class="mb-4">
-                        <h2 class="text-xl font-semibold text-center text-custom-black">Best Parameters and MSE</h2>
-                        <p class="text-center text-lg text-custom-black">Best Parameters: {best_params}</p>
-                        <p class="text-center text-lg text-custom-black">Best MSE: {best_mse:.4f}</p>
-                    </div>
-
                     <div class="text-center">
                         <a href="/" class="text-custom-black hover-text-custom-dark">Back</a>
                     </div>
@@ -234,9 +275,17 @@ async def get_results():
 
 @app.post("/api/predict")
 async def predict_height(total_time_ms: float = Form(...), interval_time_ms: float = Form(...)):
-    # Use the Fortuna model to predict height
+    """use the model to predict the height
+
+    Args:
+        total_time_ms (float, optional): The total time recorded. it not important from the fourth bouce and on. Defaults to Form(...).
+        interval_time_ms (float, optional): the time between the bounces. Defaults to Form(...).
+
+    Returns:
+        HTMLResponse: the html including the prediction
+    """    
     features = [total_time_ms, interval_time_ms]
-    predicted_height = model.predict([features])[0]
+    predicted_height = model.predict([(features)])[0] # the predict function can handle multiple predicts at the same time. and i gave it only a list of 1 tuple the prediction on index 1 is the correct prediction 
 
     return HTMLResponse(content=f"""
         <!DOCTYPE html>
