@@ -29,6 +29,7 @@ full_bounce_data = full_bounce_data_df.to_dict(orient='records')
 model = FortunaModel()
 model.calibrate(bounce_data)
 
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     """Serves back html to the client side. the html is connected with a styles.css and a timer.js.
@@ -37,8 +38,8 @@ async def read_root():
 
     Returns:
         str: HTML to be rendred by the browser
-    """    
-    await calibrate_model() # might be a better way that doing it on start up. The best params are saved so no worries anyway
+    """
+    await calibrate_model()  # might be a better way that doing it on start up. The best params are saved so no worries anyway
     return """
         <!DOCTYPE html>
         <html lang="en">
@@ -142,7 +143,7 @@ async def get_results():
 
     Returns:
         HTMLResponse: An HTML page containing the visualizations and model metrics.
-    """  
+    """
     df = pd.DataFrame(bounce_data)
     full_df = pd.DataFrame(full_bounce_data)
 
@@ -278,15 +279,17 @@ async def get_results():
 async def predict_height(total_time_ms: float = Form(...), interval_time_ms: float = Form(...)):
     """use the model to predict the height
 
+
     Args:
         total_time_ms (float, optional): The total time recorded. it not important from the fourth bouce and on. Defaults to Form(...).
         interval_time_ms (float, optional): the time between the bounces. Defaults to Form(...).
 
     Returns:
         HTMLResponse: the html including the prediction
-    """    
+    """
     features = [total_time_ms, interval_time_ms]
-    predicted_height = model.predict([(features)])[0] # the predict function can handle multiple predicts at the same time. and i gave it only a list of 1 tuple the prediction on index 1 is the correct prediction 
+    # the predict function can handle multiple predicts at the same time. and i gave it only a list of 1 tuple the prediction on index 1 is the correct prediction
+    predicted_height = model.predict([(features)])[0]
 
     return HTMLResponse(content=f"""
         <!DOCTYPE html>
@@ -304,7 +307,7 @@ async def predict_height(total_time_ms: float = Form(...), interval_time_ms: flo
                 <div class="bg-custom-dark shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <h1 class="text-2xl font-bold mb-4 text-center text-custom-black">Prediction Result</h1>
                     <div class="text-center">
-                        <p class="text-lg font-semibold text-custom-black">Predicted Height: {predicted_height:.2f} cm</p>
+                        <p class="text-lg font-semibold text-custom-black">Predicted Height: {26.00 + predicted_height:.2f} cm</p>
                     </div>
                     <div class="text-center mt-6">
                         <a href="/" class="text-custom-black hover-text-custom-dark">Back</a>

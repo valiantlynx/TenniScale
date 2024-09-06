@@ -49,6 +49,7 @@ class FortunaModel:
                 Squaring the differences removes negative mean squared error differences and guarantees that the squared mean error is always larger than or equal to zero. The value is usually always positive. Only a model without any errors will have an MSE of zero. This does not occur in actuality.
         """
         errors = [(pred - actual) ** 2 for pred, actual in zip(predictions, y)]
+        # im doing this cause the number were insanely big. it would be better if i also did sqrt() of the entire thing. but for now this works
         mse = sum(errors) / len(errors)
         return mse
 
@@ -71,7 +72,7 @@ class FortunaModel:
                         Interval_Time_ms: int = Field(..., alias="Interval Time (ms)", description="The interval time in milliseconds")
                 '''
         """
-     
+
         X = [(d['Total Time (ms)'], d['Interval Time (ms)']) for d in data]
         y = [d['Height'] for d in data]
 
@@ -84,7 +85,6 @@ class FortunaModel:
                 self.best_mse = mse
                 self.best_params = params
                 self.save_params()
-            
 
     def predict(self, X):
         """Predicts the height for the given indipendent parameters(time in ms) 

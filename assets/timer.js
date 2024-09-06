@@ -48,7 +48,12 @@ function calculateInterval() {
         const lastBounce = bounces[bounces.length - 1];
         const previousBounce = bounces[bounces.length - 2];
         const interval = (lastBounce - previousBounce) * 1000; // in milliseconds
+        
+        console.log("Bounces: ", bounces);
+
         intervalTimeInput.value = interval.toFixed(0);
+        console.log("intervalTimeInput.value: ", intervalTimeInput.value);
+
         intervalTimeInputPredict.value = intervalTimeInput.value; // also set for prediction form
     } else {
         intervalTimeInput.value = 0;
