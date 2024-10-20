@@ -2,7 +2,10 @@
 
 Welcome to **TenniScale**! A fun and innovative way to measure height using a tennis ball. This project uses various techniques to measure height and applies the Fortuna model to ensure accuracy.
 
-![TenniScale Logo](./assets/logo.jpg)
+<center>
+<img src="./assets/logo.jpg" alt="TenniScale Logo" width="300">
+</center> 
+
 ## Project Overview
 
 The idea for TenniScale came from a group of Swedes who wanted to measure their height in a more entertaining and engaging way. The concept revolves around using a tennis ball and developing a novel approach to accurately
